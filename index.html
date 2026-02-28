@@ -1,6 +1,7 @@
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbxCIvR0OiLvMBFnRKv_G2pibOyo9Kxb1MwFkvcGX_Vb9Yh8hlrbiGiyfmEf1NLyipkBpg/exec";
 
+const button = document.getElementById("accept");
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
@@ -8,19 +9,25 @@ if (!id) {
   document.body.innerHTML = "<h2>Invalid link</h2>";
 }
 
-document.getElementById("accept").onclick = function() {
-  fetch(scriptURL)
-    .then(response => response.json())
-    .then(data => {
-      if (data[id]) {
-        window.location.href = data[id];
-      } else {
-        alert("Video not found.");
-      }
-    })
-    .catch(error => {
-      alert("Error loading video link.");
-      console.error(error);
-    });
+button.onclick = async function() {
+  button.innerText = "Loading...";
+  button.disabled = true;
+
+  try {
+    const response = await fetch(scriptURL + "?id=" + id);
+    const data = await response.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Video not found.");
+      button.innerText = "Accept & Continue";
+      button.disabled = false;
+    }
+  } catch (error) {
+    alert("Error loading video.");
+    button.innerText = "Accept & Continue";
+    button.disabled = false;
+  }
 };
 </script>
