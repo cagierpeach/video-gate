@@ -10,24 +10,22 @@ if (!id) {
 }
 
 button.onclick = async function() {
-  button.innerText = "Loading...";
-  button.disabled = true;
-
   try {
+    button.innerText = "Loading...";
+    button.disabled = true;
+
     const response = await fetch(scriptURL + "?id=" + id);
     const data = await response.json();
 
     if (data.url) {
       window.location.href = data.url;
     } else {
-      alert("Video not found.");
-      button.innerText = "Accept & Continue";
-      button.disabled = false;
+      document.body.innerHTML = "<h2>Video not found</h2>";
     }
+
   } catch (error) {
-    alert("Error loading video.");
-    button.innerText = "Accept & Continue";
-    button.disabled = false;
+    console.error(error);
+    document.body.innerHTML = "<h2>Error loading link</h2>";
   }
 };
 </script>
