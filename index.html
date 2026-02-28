@@ -1,69 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Warning</title>
+  <title>SECURE SYSTEM ACCESS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      background: black;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
       text-align: center;
-      padding: 40px;
-      background-color: #f4f4f4;
-    }
-    .box {
-      background: white;
-      padding: 40px;
-      max-width: 500px;
-      margin: auto;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    }
-    h1 {
-      color: #cc0000;
-    }
-    #countdown {
-      font-size: 42px;
-      font-weight: bold;
-      margin: 25px 0;
-    }
-    .progress-container {
-      background: #ddd;
-      border-radius: 8px;
       overflow: hidden;
-      height: 14px;
-      margin-bottom: 25px;
     }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #001100 0%, black 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box {
+      width: 90%;
+      max-width: 500px;
+      padding: 40px;
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 20px #00ff00;
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    h1 {
+      color: red;
+      animation: flicker 1s infinite alternate;
+      margin-bottom: 10px;
+    }
+
+    #countdown {
+      font-size: 60px;
+      font-weight: bold;
+      margin: 20px 0;
+      animation: pulse 1s infinite;
+    }
+
+    .progress-container {
+      background: #002200;
+      height: 10px;
+      margin: 20px 0;
+      border: 1px solid #00ff00;
+    }
+
     #progress {
       height: 100%;
       width: 0%;
-      background: #007bff;
+      background: #00ff00;
       transition: width 1s linear;
     }
+
+    .checkbox-container {
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
     button {
-      padding: 15px 30px;
+      padding: 12px 30px;
       font-size: 16px;
-      border: none;
-      border-radius: 5px;
+      border: 1px solid #00ff00;
+      background: black;
+      color: #00ff00;
       cursor: not-allowed;
-      background-color: #999;
-      color: white;
+    }
+
+    button.active {
+      background: #00ff00;
+      color: black;
+      cursor: pointer;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .glitch {
+      animation: glitch 0.2s infinite;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(1px, -1px); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(1px, 1px); }
+      75% { transform: translate(-1px, -1px); }
+      100% { transform: translate(0); }
     }
   </style>
 </head>
+
 <body>
 
-<div class="box">
-  <h1>⚠ Warning</h1>
-  <p>This content is from my personal history, It was never meant for you to view.</p>
-  <p>You must wait 15 seconds before continuing.</p>
+<div class="overlay">
+  <div class="box">
+    <h1 class="glitch">⚠ UNAUTHORIZED ACCESS DETECTED ⚠</h1>
+    <p>Decrypting secure gateway...</p>
 
-  <div id="countdown">15</div>
+    <div id="countdown">20</div>
 
-  <div class="progress-container">
-    <div id="progress"></div>
+    <div class="progress-container">
+      <div id="progress"></div>
+    </div>
+
+    <div class="checkbox-container">
+      <label>
+        <input type="checkbox" id="agree">
+        I understand I am viewing history never meant for my eyes and wish to proceed
+      </label>
+    </div>
+
+    <button id="accept" disabled>ACCESS HISTORY</button>
   </div>
-
-  <button id="accept" disabled>Accept & Continue</button>
 </div>
 
 <script>
@@ -73,21 +136,33 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 if (!id) {
-  document.body.innerHTML = "<h2>Invalid link</h2>";
+  document.body.innerHTML = "<h2 style='color:red'>INVALID SESSION</h2>";
 }
 
 const button = document.getElementById("accept");
 const countdownDisplay = document.getElementById("countdown");
 const progressBar = document.getElementById("progress");
+const checkbox = document.getElementById("agree");
 
-const totalTime = 15;
+const totalTime = 20;
 let remaining = totalTime;
+let timerFinished = false;
 
-// Prevent refresh bypass
+// Persist timer on refresh
 if (sessionStorage.getItem("timeLeft")) {
   remaining = parseInt(sessionStorage.getItem("timeLeft"));
 } else {
   sessionStorage.setItem("timeLeft", totalTime);
+}
+
+function updateButtonState() {
+  if (timerFinished && checkbox.checked) {
+    button.disabled = false;
+    button.classList.add("active");
+  } else {
+    button.disabled = true;
+    button.classList.remove("active");
+  }
 }
 
 const timer = setInterval(() => {
@@ -103,14 +178,14 @@ const timer = setInterval(() => {
     clearInterval(timer);
     sessionStorage.removeItem("timeLeft");
 
-    countdownDisplay.innerText = "Ready";
-    button.disabled = false;
-    button.style.cursor = "pointer";
-    button.style.backgroundColor = "#28a745";
+    countdownDisplay.innerText = "ACCESS GRANTED";
+    timerFinished = true;
+    updateButtonState();
   }
 }, 1000);
 
-// Load full JSON (working stable version)
+checkbox.addEventListener("change", updateButtonState);
+
 fetch(scriptURL)
   .then(res => res.json())
   .then(data => {
@@ -118,12 +193,12 @@ fetch(scriptURL)
       if (data[id]) {
         window.location.href = data[id];
       } else {
-        alert("Video not found.");
+        alert("SYSTEM ERROR");
       }
     };
   });
 
-// Prevent back button bypass
+// Prevent back-button bypass
 history.pushState(null, null, location.href);
 window.onpopstate = function () {
   history.go(1);
