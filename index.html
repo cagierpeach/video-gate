@@ -5,10 +5,10 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
 if (!id) {
-  document.body.innerHTML = "<h2>Missing ID</h2>";
+  document.body.innerHTML = "<h2>Invalid link</h2>";
 }
 
-document.getElementById("accept").addEventListener("click", function() {
+document.getElementById("accept").onclick = function() {
   window.location.href = scriptURL + "?id=" + id;
-});
+};
 </script>
