@@ -12,32 +12,58 @@
     }
     .box {
       background: white;
-      padding: 30px;
+      padding: 40px;
       max-width: 500px;
       margin: auto;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+    h1 {
+      color: #cc0000;
+    }
+    #countdown {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 25px 0;
+    }
+    .progress-container {
+      background: #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      height: 14px;
+      margin-bottom: 25px;
+    }
+    #progress {
+      height: 100%;
+      width: 0%;
+      background: #007bff;
+      transition: width 1s linear;
     }
     button {
       padding: 15px 30px;
       font-size: 16px;
-      cursor: pointer;
       border: none;
-      background-color: #007bff;
-      color: white;
       border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0056b3;
+      cursor: not-allowed;
+      background-color: #999;
+      color: white;
     }
   </style>
 </head>
 <body>
 
 <div class="box">
-  <h1>Important Notice</h1>
-  <p>Please confirm you wish to continue to external content.</p>
-  <button id="accept">Accept & Continue</button>
+  <h1>⚠ Warning</h1>
+  <p>This content is from my personal history, It was never meant for you to view.</p>
+  <p>You must wait 15 seconds before continuing.</p>
+
+  <div id="countdown">15</div>
+
+  <div class="progress-container">
+    <div id="progress"></div>
+  </div>
+
+  <button id="accept" disabled>Accept & Continue</button>
 </div>
 
 <script>
@@ -50,10 +76,45 @@ if (!id) {
   document.body.innerHTML = "<h2>Invalid link</h2>";
 }
 
+const button = document.getElementById("accept");
+const countdownDisplay = document.getElementById("countdown");
+const progressBar = document.getElementById("progress");
+
+const totalTime = 15;
+let remaining = totalTime;
+
+// Prevent refresh bypass
+if (sessionStorage.getItem("timeLeft")) {
+  remaining = parseInt(sessionStorage.getItem("timeLeft"));
+} else {
+  sessionStorage.setItem("timeLeft", totalTime);
+}
+
+const timer = setInterval(() => {
+  remaining--;
+  sessionStorage.setItem("timeLeft", remaining);
+
+  countdownDisplay.innerText = remaining;
+
+  const percent = ((totalTime - remaining) / totalTime) * 100;
+  progressBar.style.width = percent + "%";
+
+  if (remaining <= 0) {
+    clearInterval(timer);
+    sessionStorage.removeItem("timeLeft");
+
+    countdownDisplay.innerText = "Ready";
+    button.disabled = false;
+    button.style.cursor = "pointer";
+    button.style.backgroundColor = "#28a745";
+  }
+}, 1000);
+
+// Load full JSON (working stable version)
 fetch(scriptURL)
   .then(res => res.json())
   .then(data => {
-    document.getElementById("accept").onclick = function() {
+    button.onclick = function() {
       if (data[id]) {
         window.location.href = data[id];
       } else {
@@ -61,6 +122,12 @@ fetch(scriptURL)
       }
     };
   });
+
+// Prevent back button bypass
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+  history.go(1);
+};
 </script>
 
 </body>
