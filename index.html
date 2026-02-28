@@ -8,7 +8,22 @@ if (!id) {
   document.body.innerHTML = "<h2>Invalid link</h2>";
 }
 
-document.getElementById("accept").onclick = function() {
-  window.location.href = scriptURL + "?id=" + id;
+document.getElementById("accept").onclick = async function() {
+  try {
+    const response = await fetch(scriptURL + "?id=" + id);
+    const text = await response.text();
+
+    // Extract URL manually
+    const match = text.match(/https?:\/\/[^\"]+/);
+
+    if (match) {
+      window.location.href = match[0];
+    } else {
+      document.body.innerHTML = "<h2>Video not found</h2>";
+    }
+
+  } catch (error) {
+    document.body.innerHTML = "<h2>Error loading video</h2>";
+  }
 };
 </script>
