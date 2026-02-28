@@ -1,3 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Warning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f4f4f4;
+    }
+    .box {
+      background: white;
+      padding: 30px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h1>Important Notice</h1>
+  <p>Please confirm you wish to continue to external content.</p>
+  <button id="accept">Accept & Continue</button>
+</div>
+
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbzdH-T92c5nc7gPDP6bqvHL78XnWgTuKbqw1o5_qa4oKBuq8iAZxvvUppmN-T0zOXEeUw/exec";
 
@@ -8,22 +50,18 @@ if (!id) {
   document.body.innerHTML = "<h2>Invalid link</h2>";
 }
 
-document.getElementById("accept").onclick = async function() {
-  try {
-    const response = await fetch(scriptURL + "?id=" + id);
-    const text = await response.text();
-
-    // Extract URL manually
-    const match = text.match(/https?:\/\/[^\"]+/);
-
-    if (match) {
-      window.location.href = match[0];
-    } else {
-      document.body.innerHTML = "<h2>Video not found</h2>";
-    }
-
-  } catch (error) {
-    document.body.innerHTML = "<h2>Error loading video</h2>";
-  }
-};
+fetch(scriptURL)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("accept").onclick = function() {
+      if (data[id]) {
+        window.location.href = data[id];
+      } else {
+        alert("Video not found.");
+      }
+    };
+  });
 </script>
+
+</body>
+</html>
